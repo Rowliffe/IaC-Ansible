@@ -1,0 +1,16 @@
+---
+- name: Restart Node App
+  shell: |
+    pkill -f "node app[.]js" || true
+    sleep 2
+    nohup node app.js > app.log 2>&1 &
+  args:
+    chdir: /opt/myapp
+  environment:
+    DB_USER: "{{ db_user }}"
+    DB_PASSWORD: "{{ db_password }}"
+    DB_NAME: "{{ db_name }}"
+    DB_HOST: "localhost"
+    APP_PORT: "{{ app_port }}"
+  async: 45
+  poll: 0

@@ -1,0 +1,4 @@
+# Variables sensibles (sera chiffré)
+db_password: "supersecretpassword"
+api_secret_key: "my-super-secret-key-123"
+

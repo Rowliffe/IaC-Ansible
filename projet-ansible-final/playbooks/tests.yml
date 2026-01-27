@@ -1,0 +1,43 @@
+---
+- name: Test Deployment
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - ../group_vars/all/vars.yml
+  
+  tasks:
+    - name: Check Frontend Web1 (Nginx)
+      uri:
+        url: "http://127.0.0.1:2221"
+        status_code: 200
+      register: web1_check
+      ignore_errors: yes
+
+    - name: Check Frontend Web2 (Nginx)
+      uri:
+        url: "http://127.0.0.1:2222"
+        status_code: 200
+      register: web2_check
+      ignore_errors: yes
+
+    - name: Check Backend API Root
+      uri:
+        url: "http://127.0.0.1:2223/"
+        status_code: 200
+      register: api_check
+      ignore_errors: yes
+
+    # Note: L'accès SSH au backend (db1) se fait sur le port 2223.
+    # L'API Node tourne DANS le conteneur db1 sur le port 3000.
+    # Dans le contexte Docker mappé, le port 3000 n'est peut-être pas exposé directement à l'hôte 
+    # (le PDF ne le précise pas explicitement pour l'accès externe API, mais on teste via SSH généralement).
+    # Ces tests supposent que les ports sont mappés localement comme indiqué dans le PDF.
+
+    - name: Report Results
+      debug:
+        msg:
+          - "Web1 Status: {{ 'OK' if web1_check.status == 200 else 'FAILED' }}"
+          - "Web2 Status: {{ 'OK' if web2_check.status == 200 else 'FAILED' }}"
+          - "API Status: {{ 'OK' if api_check.status == 200 else 'FAILED' }}"
+

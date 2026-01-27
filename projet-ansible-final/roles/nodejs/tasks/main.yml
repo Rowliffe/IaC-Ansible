@@ -1,0 +1,47 @@
+---
+- name: Install Node.js
+  apt:
+    name:
+      - nodejs
+      - npm
+    state: present
+
+- name: Create app directory
+  file:
+    path: /opt/myapp
+    state: directory
+    mode: '0755'
+
+- name: Copy package.json
+  copy:
+    src: package.json
+    dest: /opt/myapp/package.json
+
+- name: Copy app.js
+  copy:
+    src: app.js
+    dest: /opt/myapp/app.js
+  notify: Restart Node App
+
+- name: Install npm dependencies
+  npm:
+    path: /opt/myapp
+    production: yes
+    state: present
+
+- name: Start Node App (background)
+  shell: |
+    # Check if running first to avoid duplicates if not handled by handler
+    if ! pgrep -f "node app[.]js" > /dev/null; then
+      nohup node app.js > app.log 2>&1 &
+    fi
+  args:
+    chdir: /opt/myapp
+  environment:
+    DB_USER: "{{ db_user }}"
+    DB_PASSWORD: "{{ db_password }}"
+    DB_NAME: "{{ db_name }}"
+    DB_HOST: "localhost"
+    APP_PORT: "{{ app_port }}"
+  async: 45
+  poll: 0

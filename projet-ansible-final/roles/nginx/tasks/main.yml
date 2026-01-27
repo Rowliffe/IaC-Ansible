@@ -1,0 +1,241 @@
+---
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Create index.html (Web1)
+  copy:
+    dest: /var/www/html/index.html
+    content: |
+      <!DOCTYPE html>
+      <html>
+      <head><title>Projet Final Ansible</title></head>
+      <body>
+          <h1>Bienvenue sur le Frontend Web!</h1>
+          <p>Deploye avec Ansible.</p>
+      </body>
+      </html>
+    mode: '0644'
+
+- name: Create backend.html (Web2 - Backend Dashboard)
+  copy:
+    dest: /var/www/html/backend.html
+    content: |
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Backend Dashboard - Web2</title>
+          <style>
+              * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+              }
+              body {
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  min-height: 100vh;
+                  padding: 20px;
+              }
+              .container {
+                  max-width: 1200px;
+                  margin: 0 auto;
+              }
+              header {
+                  background: white;
+                  padding: 30px;
+                  border-radius: 10px;
+                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                  margin-bottom: 20px;
+              }
+              h1 {
+                  color: #667eea;
+                  margin-bottom: 10px;
+              }
+              .status-card {
+                  background: white;
+                  padding: 20px;
+                  border-radius: 10px;
+                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                  margin-bottom: 20px;
+              }
+              .status-indicator {
+                  display: inline-block;
+                  width: 12px;
+                  height: 12px;
+                  border-radius: 50%;
+                  margin-right: 10px;
+              }
+              .status-online {
+                  background: #10b981;
+                  animation: pulse 2s infinite;
+              }
+              .status-offline {
+                  background: #ef4444;
+              }
+              @keyframes pulse {
+                  0%, 100% { opacity: 1; }
+                  50% { opacity: 0.5; }
+              }
+              .endpoint {
+                  background: #f3f4f6;
+                  padding: 15px;
+                  border-radius: 5px;
+                  margin: 10px 0;
+                  border-left: 4px solid #667eea;
+              }
+              .endpoint h3 {
+                  color: #374151;
+                  margin-bottom: 5px;
+              }
+              .endpoint code {
+                  background: #1f2937;
+                  color: #10b981;
+                  padding: 5px 10px;
+                  border-radius: 3px;
+                  font-family: 'Courier New', monospace;
+              }
+              .btn {
+                  background: #667eea;
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 5px;
+                  cursor: pointer;
+                  margin: 5px;
+                  transition: background 0.3s;
+              }
+              .btn:hover {
+                  background: #5568d3;
+              }
+              .response {
+                  background: #1f2937;
+                  color: #10b981;
+                  padding: 15px;
+                  border-radius: 5px;
+                  margin-top: 10px;
+                  font-family: 'Courier New', monospace;
+                  max-height: 300px;
+                  overflow-y: auto;
+              }
+              .grid {
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                  gap: 20px;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <header>
+                  <h1>🚀 Backend Dashboard - Web2</h1>
+                  <p>Interface dédiée au monitoring du backend API</p>
+              </header>
+
+              <div class="status-card">
+                  <h2>Statut du Backend</h2>
+                  <p><span class="status-indicator status-online"></span><strong>Backend Node.js:</strong> <span id="backendStatus">En cours de vérification...</span></p>
+                  <p><strong>Port:</strong> 3000</p>
+                  <p><strong>Base de données:</strong> PostgreSQL</p>
+              </div>
+
+              <div class="status-card">
+                  <h2>Endpoints API Disponibles</h2>
+                  
+                  <div class="endpoint">
+                      <h3>🏠 Root Endpoint</h3>
+                      <p><code>GET /api/</code></p>
+                      <p>Vérifie que l'API est en ligne</p>
+                      <button class="btn" onclick="testEndpoint('/')">Tester</button>
+                      <div id="response-root" class="response" style="display:none;"></div>
+                  </div>
+
+                  <div class="endpoint">
+                      <h3>👥 Liste des Utilisateurs</h3>
+                      <p><code>GET /api/users</code></p>
+                      <p>Récupère tous les utilisateurs de la base de données</p>
+                      <button class="btn" onclick="testEndpoint('/users')">Tester</button>
+                      <div id="response-users" class="response" style="display:none;"></div>
+                  </div>
+              </div>
+
+              <div class="status-card">
+                  <h2>Logs du Backend</h2>
+                  <button class="btn" onclick="refreshAll()">🔄 Rafraîchir tout</button>
+                  <div id="logs" class="response">
+                      Cliquez sur "Tester" pour voir les réponses de l'API...
+                  </div>
+              </div>
+          </div>
+
+          <script>
+              async function testEndpoint(path) {
+                  const endpoint = '/api' + path;
+                  const responseDiv = document.getElementById('response-' + path.replace('/', 'root'));
+                  const logsDiv = document.getElementById('logs');
+                  
+                  try {
+                      logsDiv.textContent = 'Requête en cours vers ' + endpoint + '...';
+                      const response = await fetch(endpoint);
+                      const data = await response.text();
+                      
+                      let formattedData;
+                      try {
+                          formattedData = JSON.stringify(JSON.parse(data), null, 2);
+                      } catch {
+                          formattedData = data;
+                      }
+                      
+                      responseDiv.textContent = formattedData;
+                      responseDiv.style.display = 'block';
+                      
+                      logsDiv.textContent = '✅ Succès! Réponse reçue de ' + endpoint + '\n\n' + formattedData;
+                      updateBackendStatus(true);
+                  } catch (error) {
+                      responseDiv.textContent = 'Erreur: ' + error.message;
+                      responseDiv.style.display = 'block';
+                      logsDiv.textContent = '❌ Erreur lors de la requête vers ' + endpoint + '\n' + error.message;
+                      updateBackendStatus(false);
+                  }
+              }
+
+              function updateBackendStatus(isOnline) {
+                  const statusElement = document.getElementById('backendStatus');
+                  if (isOnline) {
+                      statusElement.textContent = '✅ En ligne et opérationnel';
+                      statusElement.style.color = '#10b981';
+                  } else {
+                      statusElement.textContent = '❌ Hors ligne ou inaccessible';
+                      statusElement.style.color = '#ef4444';
+                  }
+              }
+
+              function refreshAll() {
+                  testEndpoint('/');
+                  setTimeout(() => testEndpoint('/users'), 1000);
+              }
+
+              // Vérification automatique au chargement
+              window.onload = function() {
+                  testEndpoint('/');
+              };
+          </script>
+      </body>
+      </html>
+    mode: '0644'
+
+- name: Configure Nginx Proxy
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/default
+  notify: Restart Nginx
+
+- name: Enable Nginx service
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+

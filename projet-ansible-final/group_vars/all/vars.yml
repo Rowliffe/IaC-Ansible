@@ -1,0 +1,6 @@
+# Variables globales non sensibles
+app_port: 3000
+db_name: myapp
+db_user: myuser
+node_version: 18.x
+
