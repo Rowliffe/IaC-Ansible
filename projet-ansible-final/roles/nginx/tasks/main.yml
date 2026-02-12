@@ -9,11 +9,76 @@
     dest: /var/www/html/index.html
     content: |
       <!DOCTYPE html>
-      <html>
-      <head><title>Projet Final Ansible</title></head>
+      <html lang="fr">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Projet Final Ansible - Web1</title>
+          <style>
+              * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+              }
+              body {
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  min-height: 100vh;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  padding: 20px;
+              }
+              .container {
+                  background: white;
+                  padding: 40px;
+                  border-radius: 15px;
+                  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                  max-width: 600px;
+                  text-align: center;
+              }
+              h1 {
+                  color: #667eea;
+                  margin-bottom: 20px;
+                  font-size: 2.5em;
+              }
+              p {
+                  color: #374151;
+                  margin: 15px 0;
+                  font-size: 1.1em;
+                  line-height: 1.6;
+              }
+              .vault-message {
+                  background: #f0fdf4;
+                  border: 2px solid #10b981;
+                  border-radius: 10px;
+                  padding: 20px;
+                  margin-top: 30px;
+                  font-weight: bold;
+                  color: #065f46;
+              }
+              .badge {
+                  display: inline-block;
+                  background: #667eea;
+                  color: white;
+                  padding: 5px 15px;
+                  border-radius: 20px;
+                  font-size: 0.9em;
+                  margin: 10px 0;
+              }
+          </style>
+      </head>
       <body>
-          <h1>Bienvenue sur le Frontend Web!</h1>
-          <p>Deploye avec Ansible.</p>
+          <div class="container">
+              <h1>🎉 Bienvenue sur Web1</h1>
+              <span class="badge">Frontend Server</span>
+              <p>Cette page a été déployée avec Ansible sur le serveur Web1.</p>
+              <p>📦 Projet Final Ansible V4</p>
+              
+              <div class="vault-message">
+                  {{ vault_test_message }}
+              </div>
+          </div>
       </body>
       </html>
     mode: '0644'

@@ -1,4 +1,5 @@
 # Variables sensibles (sera chiffré)
 db_password: "supersecretpassword"
 api_secret_key: "my-super-secret-key-123"
+vault_test_message: "🔐 Message secret du Vault : Si vous voyez ce texte, le vault fonctionne correctement !"
 
