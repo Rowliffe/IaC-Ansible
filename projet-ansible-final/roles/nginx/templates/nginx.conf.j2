@@ -3,13 +3,35 @@ server {
     listen [::]:80 default_server;
 
     root /var/www/html;
+{% if inventory_hostname == 'web1' %}
     index index.html index.htm;
+{% else %}
+    index backend.html;
+{% endif %}
 
     server_name _;
 
+{% if inventory_hostname == 'web1' %}
+    # Configuration Web1 - Accès uniquement à index.html
     location / {
-        try_files $uri $uri/ =404;
+        try_files $uri /index.html =404;
     }
+    
+    # Bloquer l'accès à backend.html sur web1
+    location = /backend.html {
+        return 404;
+    }
+{% else %}
+    # Configuration Web2 - Accès uniquement à backend.html
+    location / {
+        try_files $uri /backend.html =404;
+    }
+    
+    # Bloquer l'accès à index.html sur web2
+    location = /index.html {
+        return 404;
+    }
+{% endif %}
 
     location /api/ {
         proxy_pass http://db1:{{ app_port }}/;

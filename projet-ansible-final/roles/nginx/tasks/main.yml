@@ -4,7 +4,7 @@
     name: nginx
     state: present
 
-- name: Create index.html (Web1)
+- name: Create index.html (Web1 uniquement)
   copy:
     dest: /var/www/html/index.html
     content: |
@@ -17,8 +17,9 @@
       </body>
       </html>
     mode: '0644'
+  when: inventory_hostname == 'web1'
 
-- name: Create backend.html (Web2 - Backend Dashboard)
+- name: Create backend.html (Web2 uniquement)
   copy:
     dest: /var/www/html/backend.html
     content: |
@@ -226,6 +227,19 @@
       </body>
       </html>
     mode: '0644'
+  when: inventory_hostname == 'web2'
+
+- name: Remove index.html from Web2
+  file:
+    path: /var/www/html/index.html
+    state: absent
+  when: inventory_hostname == 'web2'
+
+- name: Remove backend.html from Web1
+  file:
+    path: /var/www/html/backend.html
+    state: absent
+  when: inventory_hostname == 'web1'
 
 - name: Configure Nginx Proxy
   template:
