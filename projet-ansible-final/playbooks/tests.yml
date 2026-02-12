@@ -1,43 +1,85 @@
 ---
-- name: Test Deployment
-  hosts: localhost
-  connection: local
+# Tests de validation selon le PDF (page 6)
+- name: Test Deployment - Validation des Services
+  hosts: all
+  become: yes
   gather_facts: no
   vars_files:
     - ../group_vars/all/vars.yml
   
   tasks:
+    # Test 1 : Page web accessible (depuis les conteneurs webservers)
     - name: Check Frontend Web1 (Nginx)
       uri:
-        url: "http://127.0.0.1:2221"
+        url: "http://localhost"
         status_code: 200
       register: web1_check
       ignore_errors: yes
+      when: inventory_hostname in groups['webservers']
 
-    - name: Check Frontend Web2 (Nginx)
+    # Test 2 : API accessible (depuis db1)
+    - name: Check Backend API Root Endpoint
       uri:
-        url: "http://127.0.0.1:2222"
+        url: "http://localhost:{{ app_port }}/"
         status_code: 200
-      register: web2_check
+        return_content: yes
+      register: api_root_check
       ignore_errors: yes
+      when: inventory_hostname in groups['appservers']
 
-    - name: Check Backend API Root
+    - name: Check Backend API Users Endpoint
       uri:
-        url: "http://127.0.0.1:2223/"
+        url: "http://localhost:{{ app_port }}/users"
         status_code: 200
-      register: api_check
+        return_content: yes
+      register: api_users_check
       ignore_errors: yes
+      when: inventory_hostname in groups['appservers']
 
-    # Note: L'accès SSH au backend (db1) se fait sur le port 2223.
-    # L'API Node tourne DANS le conteneur db1 sur le port 3000.
-    # Dans le contexte Docker mappé, le port 3000 n'est peut-être pas exposé directement à l'hôte 
-    # (le PDF ne le précise pas explicitement pour l'accès externe API, mais on teste via SSH généralement).
-    # Ces tests supposent que les ports sont mappés localement comme indiqué dans le PDF.
+    # Test 3 : Processus présents (containers sans systemd)
+    - name: Check Nginx Process Running
+      shell: pgrep -x nginx > /dev/null
+      register: nginx_process
+      ignore_errors: yes
+      changed_when: false
+      when: inventory_hostname in groups['webservers']
 
-    - name: Report Results
+    - name: Check PostgreSQL Process Running
+      shell: pgrep -fa postgres > /dev/null
+      register: postgres_process
+      ignore_errors: yes
+      changed_when: false
+      when: inventory_hostname in groups['appservers']
+
+    - name: Check Node.js Process Running
+      shell: pgrep -f 'node.*app.js' > /dev/null
+      register: node_process
+      ignore_errors: yes
+      changed_when: false
+      when: inventory_hostname in groups['appservers']
+
+    # Rapport des résultats
+    - name: Report Web Server Results
       debug:
         msg:
-          - "Web1 Status: {{ 'OK' if web1_check.status == 200 else 'FAILED' }}"
-          - "Web2 Status: {{ 'OK' if web2_check.status == 200 else 'FAILED' }}"
-          - "API Status: {{ 'OK' if api_check.status == 200 else 'FAILED' }}"
+          - "========================================="
+          - "Serveur: {{ inventory_hostname }}"
+          - "Type: Frontend Web Server"
+          - "Nginx Web: {{ 'OK ✅' if (web1_check.status|default(0) == 200) else 'FAILED ❌' }}"
+          - "Nginx Process: {{ 'OK ✅' if (nginx_process.rc|default(1) == 0) else 'FAILED ❌' }}"
+          - "========================================="
+      when: inventory_hostname in groups['webservers']
+
+    - name: Report Backend Server Results
+      debug:
+        msg:
+          - "========================================="
+          - "Serveur: {{ inventory_hostname }}"
+          - "Type: Backend Server (API + Database)"
+          - "API Root (/): {{ 'OK ✅' if (api_root_check.status|default(0) == 200) else 'FAILED ❌' }}"
+          - "API Users (/users): {{ 'OK ✅' if (api_users_check.status|default(0) == 200) else 'FAILED ❌' }}"
+          - "PostgreSQL Process: {{ 'OK ✅' if (postgres_process.rc|default(1) == 0) else 'FAILED ❌' }}"
+          - "Node.js Process: {{ 'OK ✅' if (node_process.rc|default(1) == 0) else 'FAILED ❌' }}"
+          - "========================================="
+      when: inventory_hostname in groups['appservers']
 
