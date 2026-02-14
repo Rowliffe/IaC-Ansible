@@ -107,9 +107,6 @@ Ansible Lint permet de vérifier la qualité et les bonnes pratiques de vos play
 # Linter tous les playbooks
 ansible-lint playbooks/site.yml
 ansible-lint playbooks/tests.yml
-
-# Linter l'ensemble du projet
-ansible-lint
 ```
 
 ### Vérification de la Syntaxe
