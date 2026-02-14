@@ -71,12 +71,29 @@ ansible-playbook playbooks/site.yml
 
 ## Tests
 
-### Tests automatisés
+### Playbook de Tests Automatisés
+
+Le projet inclut un playbook de tests complet (`playbooks/tests.yml`) qui valide le déploiement :
+
+**Contenu du playbook de tests :**
+- ✅ Vérification de l'accessibilité des pages web Nginx
+- ✅ Test des endpoints API (/ et /users)
+- ✅ Vérification que les processus sont actifs (Nginx, PostgreSQL, Node.js)
+- ✅ Rapport détaillé des résultats pour chaque serveur
+
+**Exécution des tests :**
+
 ```bash
+# Vérifier la syntaxe du playbook de tests
+ansible-playbook playbooks/tests.yml --syntax-check
+
+# Lancer tous les tests
 ansible-playbook playbooks/tests.yml
 ```
 
-### Tests manuels
+Le playbook affiche un rapport visuel avec ✅ (succès) ou ❌ (échec) pour chaque test.
+
+### Tests Manuels Ad-hoc
 
 **Test 1 : Vérifier que les pages web sont accessibles**
 ```bash
@@ -94,6 +111,84 @@ ansible appservers -m uri -a "url=http://localhost:3000/users status_code=200"
 ansible webservers -m shell -a "pgrep -x nginx >/dev/null"
 ansible appservers -m shell -a "pgrep -fa postgres >/dev/null"
 ansible appservers -m shell -a "pgrep -f 'node.*app.js'"
+```
+
+## Validation et Qualité du Code
+
+### Ansible Lint
+
+Ansible Lint permet de vérifier la qualité et les bonnes pratiques de vos playbooks et rôles.
+
+**Installation d'Ansible Lint :**
+```bash
+# Via pip
+pip install ansible-lint
+
+# Via apt (Ubuntu/Debian)
+sudo apt install ansible-lint
+```
+
+**Commandes de vérification :**
+
+```bash
+# Linter tous les playbooks
+ansible-lint playbooks/site.yml
+ansible-lint playbooks/tests.yml
+
+# Linter tous les rôles
+ansible-lint roles/
+
+# Linter un rôle spécifique
+ansible-lint roles/nginx/
+ansible-lint roles/nodejs/
+ansible-lint roles/postgresql/
+ansible-lint roles/common/
+
+# Linter l'ensemble du projet
+ansible-lint
+```
+
+**Options utiles :**
+```bash
+# Mode strict (aucun warning accepté)
+ansible-lint --strict playbooks/site.yml
+
+# Afficher les règles appliquées
+ansible-lint -L
+
+# Ignorer certaines règles spécifiques
+ansible-lint --skip-list role-name,yaml playbooks/site.yml
+
+# Format parseable pour intégration CI/CD
+ansible-lint -p playbooks/site.yml
+```
+
+### Vérification de la Syntaxe
+
+**Vérifier la syntaxe des playbooks :**
+```bash
+# Playbook principal
+ansible-playbook playbooks/site.yml --syntax-check
+
+# Playbook de tests
+ansible-playbook playbooks/tests.yml --syntax-check
+```
+
+**Mode dry-run (simulation sans modification) :**
+```bash
+ansible-playbook playbooks/site.yml --check
+```
+
+**Mode verbeux (debug) :**
+```bash
+# Niveau 1 : informations de base
+ansible-playbook playbooks/site.yml -v
+
+# Niveau 2 : plus de détails
+ansible-playbook playbooks/site.yml -vv
+
+# Niveau 3 : debug complet
+ansible-playbook playbooks/site.yml -vvv
 ```
 
 ## Structure du Projet
