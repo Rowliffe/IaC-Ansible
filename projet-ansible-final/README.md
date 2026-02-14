@@ -47,6 +47,11 @@ ansible-playbook playbooks/site.yml --syntax-check
 ```bash
 ansible-playbook playbooks/site.yml
 ```
+### 4. Déployer l'application avec un mot de passe
+
+```bash
+ansible-playbook playbooks/site.yml --ask-vault-pass
+```
 
 Le mot de passe du vault est : `ansible123`
 
