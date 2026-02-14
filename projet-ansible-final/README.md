@@ -159,6 +159,22 @@ Les informations sensibles (mots de passe PostgreSQL) sont stockées dans `group
 
 **Mot de passe du vault** : `ansible123`
 
+Pour encrypter le contenu :
+```bash
+cd IaC-Ansible/projet-ansible-final
+ansible-vault encrypt group_vars/all/vault.yml
+```
+Pour décrypter le contenu :
+```bash
+cd IaC-Ansible/projet-ansible-final/group_vars/all
+ansible-vault decrypt vault.yml
+```
+Pour regarder le contenu dans le modifier (il faut que le contenu sois d'abord crypter) :
+```bash
+cd IaC-Ansible/projet-ansible-final/group_vars/all
+ansible-vault view vault.yml
+```
+
 Pour modifier les secrets :
 ```bash
 ansible-vault edit group_vars/all/vault.yml
