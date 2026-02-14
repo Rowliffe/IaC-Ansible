@@ -30,7 +30,7 @@ Les serveurs web Nginx font office de reverse proxy vers l'API backend (`/api/` 
 ### 1. Cloner le projet
 ```bash
 git clone https://github.com/Rowliffe/IaC-Ansible
-cd projet-ansible-final
+cd IaC-Ansible/projet-ansible-final
 ```
 
 ### 2. Démarrer les conteneurs
