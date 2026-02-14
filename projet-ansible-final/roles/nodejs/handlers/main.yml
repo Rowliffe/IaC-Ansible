@@ -1,6 +1,6 @@
 ---
 - name: Restart Node App
-  shell: |
+  ansible.builtin.shell: |
     pkill -f "node app[.]js" || true
     sleep 2
     nohup node app.js > app.log 2>&1 &
@@ -14,3 +14,4 @@
     APP_PORT: "{{ app_port }}"
   async: 45
   poll: 0
+  changed_when: true

@@ -1,7 +1,7 @@
 ---
 - name: Deploy Common Configuration
   hosts: all
-  become: yes
+  become: true
   vars_files:
     - ../group_vars/all/vars.yml
     - ../group_vars/all/vault.yml
@@ -10,7 +10,7 @@
 
 - name: Deploy Database and API Backend
   hosts: appservers
-  become: yes
+  become: true
   vars_files:
     - ../group_vars/all/vars.yml
     - ../group_vars/all/vault.yml
@@ -20,10 +20,9 @@
 
 - name: Deploy Web Frontend
   hosts: webservers
-  become: yes
+  become: true
   vars_files:
     - ../group_vars/all/vars.yml
     - ../group_vars/all/vault.yml
   roles:
     - nginx
-

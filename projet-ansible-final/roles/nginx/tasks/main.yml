@@ -1,11 +1,11 @@
 ---
 - name: Install Nginx
-  apt:
+  ansible.builtin.apt:
     name: nginx
     state: present
 
 - name: Create index.html (Web1 uniquement)
-  copy:
+  ansible.builtin.copy:
     dest: /var/www/html/index.html
     content: |
       <!DOCTYPE html>
@@ -74,7 +74,7 @@
               <span class="badge">Frontend Server</span>
               <p>Cette page a été déployée avec Ansible sur le serveur Web1.</p>
               <p>📦 Projet Final Ansible V4</p>
-              
+
               <div class="vault-message">
                   {{ vault_test_message }}
               </div>
@@ -85,7 +85,7 @@
   when: inventory_hostname == 'web1'
 
 - name: Create backend.html (Web2 uniquement)
-  copy:
+  ansible.builtin.copy:
     dest: /var/www/html/backend.html
     content: |
       <!DOCTYPE html>
@@ -203,14 +203,18 @@
 
               <div class="status-card">
                   <h2>Statut du Backend</h2>
-                  <p><span class="status-indicator status-online"></span><strong>Backend Node.js:</strong> <span id="backendStatus">En cours de vérification...</span></p>
+                  <p>
+                      <span class="status-indicator status-online"></span>
+                      <strong>Backend Node.js:</strong>
+                      <span id="backendStatus">En cours de vérification...</span>
+                  </p>
                   <p><strong>Port:</strong> 3000</p>
                   <p><strong>Base de données:</strong> PostgreSQL</p>
               </div>
 
               <div class="status-card">
                   <h2>Endpoints API Disponibles</h2>
-                  
+
                   <div class="endpoint">
                       <h3>🏠 Root Endpoint</h3>
                       <p><code>GET /api/</code></p>
@@ -242,22 +246,22 @@
                   const endpoint = '/api' + path;
                   const responseDiv = document.getElementById('response-' + path.replace('/', 'root'));
                   const logsDiv = document.getElementById('logs');
-                  
+
                   try {
                       logsDiv.textContent = 'Requête en cours vers ' + endpoint + '...';
                       const response = await fetch(endpoint);
                       const data = await response.text();
-                      
+
                       let formattedData;
                       try {
                           formattedData = JSON.stringify(JSON.parse(data), null, 2);
                       } catch {
                           formattedData = data;
                       }
-                      
+
                       responseDiv.textContent = formattedData;
                       responseDiv.style.display = 'block';
-                      
+
                       logsDiv.textContent = '✅ Succès! Réponse reçue de ' + endpoint + '\n\n' + formattedData;
                       updateBackendStatus(true);
                   } catch (error) {
@@ -295,26 +299,26 @@
   when: inventory_hostname == 'web2'
 
 - name: Remove index.html from Web2
-  file:
+  ansible.builtin.file:
     path: /var/www/html/index.html
     state: absent
   when: inventory_hostname == 'web2'
 
 - name: Remove backend.html from Web1
-  file:
+  ansible.builtin.file:
     path: /var/www/html/backend.html
     state: absent
   when: inventory_hostname == 'web1'
 
 - name: Configure Nginx Proxy
-  template:
+  ansible.builtin.template:
     src: nginx.conf.j2
     dest: /etc/nginx/sites-available/default
+    mode: '0644'
   notify: Restart Nginx
 
 - name: Enable Nginx service
-  service:
+  ansible.builtin.service:
     name: nginx
     state: started
-    enabled: yes
-
+    enabled: true

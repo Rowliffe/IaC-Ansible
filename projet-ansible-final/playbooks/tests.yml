@@ -2,84 +2,83 @@
 # Tests de validation selon le PDF (page 6)
 - name: Test Deployment - Validation des Services
   hosts: all
-  become: yes
-  gather_facts: no
+  become: true
+  gather_facts: false
   vars_files:
     - ../group_vars/all/vars.yml
-  
+
   tasks:
     # Test 1 : Page web accessible (depuis les conteneurs webservers)
     - name: Check Frontend Web1 (Nginx)
-      uri:
+      ansible.builtin.uri:
         url: "http://localhost"
         status_code: 200
       register: web1_check
-      ignore_errors: yes
+      failed_when: false
       when: inventory_hostname in groups['webservers']
 
     # Test 2 : API accessible (depuis db1)
     - name: Check Backend API Root Endpoint
-      uri:
+      ansible.builtin.uri:
         url: "http://localhost:{{ app_port }}/"
         status_code: 200
-        return_content: yes
+        return_content: true
       register: api_root_check
-      ignore_errors: yes
+      failed_when: false
       when: inventory_hostname in groups['appservers']
 
     - name: Check Backend API Users Endpoint
-      uri:
+      ansible.builtin.uri:
         url: "http://localhost:{{ app_port }}/users"
         status_code: 200
-        return_content: yes
+        return_content: true
       register: api_users_check
-      ignore_errors: yes
+      failed_when: false
       when: inventory_hostname in groups['appservers']
 
     # Test 3 : Processus présents (containers sans systemd)
     - name: Check Nginx Process Running
-      shell: pgrep -x nginx > /dev/null
+      ansible.builtin.command: pgrep -x nginx
       register: nginx_process
-      ignore_errors: yes
+      failed_when: false
       changed_when: false
       when: inventory_hostname in groups['webservers']
 
     - name: Check PostgreSQL Process Running
-      shell: pgrep -fa postgres > /dev/null
+      ansible.builtin.command: pgrep -fa postgres
       register: postgres_process
-      ignore_errors: yes
+      failed_when: false
       changed_when: false
       when: inventory_hostname in groups['appservers']
 
     - name: Check Node.js Process Running
-      shell: pgrep -f 'node.*app.js' > /dev/null
+      ansible.builtin.command: pgrep -f 'node.*app.js'
       register: node_process
-      ignore_errors: yes
+      failed_when: false
       changed_when: false
       when: inventory_hostname in groups['appservers']
 
     # Rapport des résultats
     - name: Report Web Server Results
-      debug:
+      ansible.builtin.debug:
         msg:
           - "========================================="
           - "Serveur: {{ inventory_hostname }}"
           - "Type: Frontend Web Server"
-          - "Nginx Web: {{ 'OK ✅' if (web1_check.status|default(0) == 200) else 'FAILED ❌' }}"
-          - "Nginx Process: {{ 'OK ✅' if (nginx_process.rc|default(1) == 0) else 'FAILED ❌' }}"
+          - "Nginx Web: {{ 'OK ✅' if (web1_check.status | default(0) == 200) else 'FAILED ❌' }}"
+          - "Nginx Process: {{ 'OK ✅' if (nginx_process.rc | default(1) == 0) else 'FAILED ❌' }}"
           - "========================================="
       when: inventory_hostname in groups['webservers']
 
     - name: Report Backend Server Results
-      debug:
+      ansible.builtin.debug:
         msg:
           - "========================================="
           - "Serveur: {{ inventory_hostname }}"
           - "Type: Backend Server (API + Database)"
-          - "API Root (/): {{ 'OK ✅' if (api_root_check.status|default(0) == 200) else 'FAILED ❌' }}"
-          - "API Users (/users): {{ 'OK ✅' if (api_users_check.status|default(0) == 200) else 'FAILED ❌' }}"
-          - "PostgreSQL Process: {{ 'OK ✅' if (postgres_process.rc|default(1) == 0) else 'FAILED ❌' }}"
-          - "Node.js Process: {{ 'OK ✅' if (node_process.rc|default(1) == 0) else 'FAILED ❌' }}"
+          - "API Root (/): {{ 'OK ✅' if (api_root_check.status | default(0) == 200) else 'FAILED ❌' }}"
+          - "API Users (/users): {{ 'OK ✅' if (api_users_check.status | default(0) == 200) else 'FAILED ❌' }}"
+          - "PostgreSQL Process: {{ 'OK ✅' if (postgres_process.rc | default(1) == 0) else 'FAILED ❌' }}"
+          - "Node.js Process: {{ 'OK ✅' if (node_process.rc | default(1) == 0) else 'FAILED ❌' }}"
           - "========================================="
       when: inventory_hostname in groups['appservers']
-

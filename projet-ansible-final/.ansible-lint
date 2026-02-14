@@ -1,0 +1,20 @@
+# Configuration ansible-lint pour le projet final
+---
+profile: production
+
+# Exclure certains fichiers du linting
+exclude_paths:
+  - .git/
+  - .vault_pass
+  - '*.Zone.Identifier'
+  - group_vars/all/vault.yml  # Fichier chiffré
+
+# Règles à ignorer si nécessaire (actuellement aucune)
+skip_list: []
+
+# Activer les règles strictes
+strict: false
+
+# Verbosité
+verbosity: 1
+
