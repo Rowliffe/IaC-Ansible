@@ -29,7 +29,7 @@ Les serveurs web Nginx font office de reverse proxy vers l'API backend (`/api/` 
 
 ### 1. Cloner le projet
 ```bash
-git clone <url_repo>
+git clone https://github.com/Rowliffe/IaC-Ansible
 cd projet-ansible-final
 ```
 
@@ -58,16 +58,11 @@ ansible-playbook playbooks/site.yml
 ## Utilisation
 
 ### Accès au frontend
-- Web1 : `http://localhost` depuis le conteneur web1
-- Web2 : `http://localhost` depuis le conteneur web2
+- Web1 : `http://localhost:8081/` depuis le conteneur web1
+- Web2 : `http://localhost:8082/` depuis le conteneur web2
 
 ### Accès à l'API
-- Via Nginx (recommandé) : `http://localhost/api/` depuis web1 ou web2
-- Direct depuis db1 : `http://localhost:3000/`
-
-### Endpoints API disponibles
-- `GET /` : Message de bienvenue
-- `GET /users` : Liste des utilisateurs depuis PostgreSQL
+- Via Nginx (recommandé) : `http://localhost:8082/GET/api` depuis web2
 
 ## Tests
 
@@ -81,6 +76,7 @@ Le projet inclut un playbook de tests complet (`playbooks/tests.yml`) qui valide
 - ✅ Vérification que les processus sont actifs (Nginx, PostgreSQL, Node.js)
 - ✅ Rapport détaillé des résultats pour chaque serveur
 
+
 **Exécution des tests :**
 
 ```bash
@@ -93,40 +89,12 @@ ansible-playbook playbooks/tests.yml
 
 Le playbook affiche un rapport visuel avec ✅ (succès) ou ❌ (échec) pour chaque test.
 
-### Tests Manuels Ad-hoc
-
-**Test 1 : Vérifier que les pages web sont accessibles**
-```bash
-ansible webservers -m uri -a "url=http://localhost status_code=200"
-```
-
-**Test 2 : Vérifier que l'API répond**
-```bash
-ansible appservers -m uri -a "url=http://localhost:3000/ status_code=200"
-ansible appservers -m uri -a "url=http://localhost:3000/users status_code=200"
-```
-
-**Test 3 : Vérifier que les processus sont actifs**
-```bash
-ansible webservers -m shell -a "pgrep -x nginx >/dev/null"
-ansible appservers -m shell -a "pgrep -fa postgres >/dev/null"
-ansible appservers -m shell -a "pgrep -f 'node.*app.js'"
-```
 
 ## Validation et Qualité du Code
 
 ### Ansible Lint
 
 Ansible Lint permet de vérifier la qualité et les bonnes pratiques de vos playbooks et rôles.
-
-**Installation d'Ansible Lint :**
-```bash
-# Via pip
-pip install ansible-lint
-
-# Via apt (Ubuntu/Debian)
-sudo apt install ansible-lint
-```
 
 **Commandes de vérification :**
 
@@ -135,32 +103,8 @@ sudo apt install ansible-lint
 ansible-lint playbooks/site.yml
 ansible-lint playbooks/tests.yml
 
-# Linter tous les rôles
-ansible-lint roles/
-
-# Linter un rôle spécifique
-ansible-lint roles/nginx/
-ansible-lint roles/nodejs/
-ansible-lint roles/postgresql/
-ansible-lint roles/common/
-
 # Linter l'ensemble du projet
 ansible-lint
-```
-
-**Options utiles :**
-```bash
-# Mode strict (aucun warning accepté)
-ansible-lint --strict playbooks/site.yml
-
-# Afficher les règles appliquées
-ansible-lint -L
-
-# Ignorer certaines règles spécifiques
-ansible-lint --skip-list role-name,yaml playbooks/site.yml
-
-# Format parseable pour intégration CI/CD
-ansible-lint -p playbooks/site.yml
 ```
 
 ### Vérification de la Syntaxe
@@ -179,16 +123,10 @@ ansible-playbook playbooks/tests.yml --syntax-check
 ansible-playbook playbooks/site.yml --check
 ```
 
-**Mode verbeux (debug) :**
+si vous avez des problèmes avec des fichier Zone.Identifier faite cette commande : 
+
 ```bash
-# Niveau 1 : informations de base
-ansible-playbook playbooks/site.yml -v
-
-# Niveau 2 : plus de détails
-ansible-playbook playbooks/site.yml -vv
-
-# Niveau 3 : debug complet
-ansible-playbook playbooks/site.yml -vvv
+Get-ChildItem -Path . -Recurse -Filter "*Zone.Identifier" | Remove-Item -Force
 ```
 
 ## Structure du Projet
@@ -224,14 +162,3 @@ Pour modifier les secrets :
 ansible-vault edit group_vars/all/vault.yml
 ```
 
-## Auteur
-
-[Votre Nom]
-
-## Ressources
-
-- [Documentation Ansible](https://docs.ansible.com/)
-- [Ansible Galaxy](https://galaxy.ansible.com/)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Express.js Documentation](https://expressjs.com/)
-- [Nginx Documentation](https://nginx.org/en/docs/)
