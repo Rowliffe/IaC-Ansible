@@ -1,0 +1,45 @@
+# Fichiers de mot de passe Ansible Vault
+.vault_pass
+.vault_password
+vault-pass.txt
+vault_pass.txt
+vault.pass
+*vault*pass*
+
+# Fichiers de configuration sensibles
+*.pem
+*.key
+*.cert
+
+# Fichiers temporaires Ansible
+*.retry
+*.log
+
+# Répertoires de cache
+.cache/
+__pycache__/
+*.pyc
+
+# Fichiers de l'éditeur
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Environnements virtuels Python
+venv/
+env/
+.venv/
+
+# Collections Ansible téléchargées
+collections/
+
+# Fichiers de backup
+*.bak
+*.backup
+
