@@ -157,7 +157,7 @@ projet-ansible-final/
 
 Les informations sensibles (mots de passe PostgreSQL) sont stockées dans `group_vars/all/vault.yml` et chiffrées avec Ansible Vault.
 
-**Mot de passe du vault** : (NE pas oublier de créer un fichier .vault_pass `ansible123`
+**Mot de passe du vault** : (NE pas oublier de créer un fichier .vault_pass ) `ansible123`
 
 Pour encrypter le contenu :
 ```bash
